@@ -47,7 +47,7 @@ A comprehensive Windows Desktop application built with Flutter for managing stud
 
 ### 1. First Run & Setup
 1. **Launch the App:** Run `studentmanagement.exe`.
-2. **Login:** Use the administrator credentials provided during setup (Default: `admin` / `admin`).
+2. **Login:** Use the administrator credentials provided during setup (Default: `admin` / `admin123`).
 3. **Configure School Profile:** Go to **Settings** -> **School Profile** to set your school name and logo.
 
 ### 2. Setting Up Academic Data (Admin)
