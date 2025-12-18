@@ -73,11 +73,13 @@ class GradingEngine {
     // Seed Defaults for 8, 9, 10 if missing
     if (!_allRules.containsKey('8')) _allRules['8'] = List.from(_std8Rules);
     if (!_allRules.containsKey('9')) _allRules['9'] = List.from(_defaultRules);
-    if (!_allRules.containsKey('10'))
+    if (!_allRules.containsKey('10')) {
       _allRules['10'] = List.from(_defaultRules);
+    }
     // Also seed default if missing
-    if (!_allRules.containsKey('default'))
+    if (!_allRules.containsKey('default')) {
       _allRules['default'] = List.from(_defaultRules);
+    }
   }
 
   Map<String, dynamic> calculate(

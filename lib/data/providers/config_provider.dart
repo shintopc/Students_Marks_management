@@ -71,11 +71,8 @@ class ConfigProvider with ChangeNotifier {
   String _schoolName = "Student Marks Management System";
 
   String _logoPath = "";
-  double _monthlyTarget = 0.0;
-
   String get schoolName => _schoolName;
   String get logoPath => _logoPath;
-  double get monthlyTarget => _monthlyTarget;
 
   Future<void> loadSchoolProfile() async {
     final db = await DatabaseHelper.instance.database;
@@ -91,30 +88,6 @@ class ConfigProvider with ChangeNotifier {
       _logoPath = profile['logo_path'] ?? "";
       notifyListeners();
     }
-  }
-
-  Future<void> loadMonthlyTarget() async {
-    final db = await DatabaseHelper.instance.database;
-    final row = await db.query(
-      'config',
-      where: 'key = ?',
-      whereArgs: ['monthly_target'],
-    );
-    if (row.isNotEmpty) {
-      _monthlyTarget = double.tryParse(row.first['value'] as String) ?? 0.0;
-      notifyListeners();
-    }
-  }
-
-  Future<void> setMonthlyTarget(double target) async {
-    final db = await DatabaseHelper.instance.database;
-    await db.insert('config', {
-      'key': 'monthly_target',
-      'value': target.toString(),
-    }, conflictAlgorithm: ConflictAlgorithm.replace);
-
-    _monthlyTarget = target;
-    notifyListeners();
   }
 
   Future<void> _seedDefaults(Database db) async {

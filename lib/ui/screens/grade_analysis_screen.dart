@@ -150,7 +150,7 @@ class _GradeAnalysisScreenState extends State<GradeAnalysisScreen> {
               children: [
                 Expanded(
                   child: DropdownButtonFormField<String>(
-                    value: _selectedClass,
+                    initialValue: _selectedClass,
                     decoration: const InputDecoration(
                       labelText: 'Class',
                       border: OutlineInputBorder(),
@@ -167,7 +167,7 @@ class _GradeAnalysisScreenState extends State<GradeAnalysisScreen> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: DropdownButtonFormField<String>(
-                    value: _selectedTerm,
+                    initialValue: _selectedTerm,
                     decoration: const InputDecoration(
                       labelText: 'Term',
                       border: OutlineInputBorder(),
@@ -184,7 +184,7 @@ class _GradeAnalysisScreenState extends State<GradeAnalysisScreen> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: DropdownButtonFormField<SubjectModel>(
-                    value: _selectedSubject,
+                    initialValue: _selectedSubject,
                     decoration: const InputDecoration(
                       labelText: 'Filter Subject',
                       border: OutlineInputBorder(),

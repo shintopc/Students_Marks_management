@@ -30,8 +30,9 @@ class ReportGenerator {
     // Group Marks by Student: StudentID -> { SubjectID -> Mark }
     final Map<int, Map<int, MarkModel>> studentMarks = {};
     for (var m in marks) {
-      if (!studentMarks.containsKey(m.studentId))
+      if (!studentMarks.containsKey(m.studentId)) {
         studentMarks[m.studentId] = {};
+      }
       studentMarks[m.studentId]![m.subjectId] = m;
     }
 
@@ -423,7 +424,7 @@ class ReportGenerator {
                   );
 
                   return pw.TableRow(children: rowCells);
-                }).toList(),
+                }),
               ],
             ),
           ]; // MultiPage children
@@ -485,8 +486,9 @@ class ReportGenerator {
     // Group Marks by Student: StudentID -> { SubjectID -> Mark }
     final Map<int, Map<int, MarkModel>> studentMarks = {};
     for (var m in marks) {
-      if (!studentMarks.containsKey(m.studentId))
+      if (!studentMarks.containsKey(m.studentId)) {
         studentMarks[m.studentId] = {};
+      }
       studentMarks[m.studentId]![m.subjectId] = m;
     }
 
@@ -800,7 +802,7 @@ class ReportGenerator {
                         ),
                       ],
                     );
-                  }).toList(),
+                  }),
                   // Total
                   pw.TableRow(
                     children: [

@@ -63,11 +63,14 @@ class _MarksEntryScreenState extends State<MarksEntryScreen> {
   @override
   void initState() {
     super.initState();
-    GradingEngine().initialize(); // Ensure rules are loaded
+    // GradingEngine().initialize(); // Moved to _loadInitialData to await properly
+
     _loadInitialData();
   }
 
   Future<void> _loadInitialData() async {
+    await GradingEngine()
+        .initialize(); // Ensure rules are loaded before anything
     final db = await DatabaseHelper.instance.database;
 
     // Load Terms
@@ -218,12 +221,12 @@ class _MarksEntryScreenState extends State<MarksEntryScreen> {
           }
 
           // Calculate Grades
-          // Calculate Grades
           final teRes = GradingEngine().calculate(
             w,
             _selectedSubject!.maxWrittenMarks,
             grade: _currentGrade,
           );
+
           final ceRes = GradingEngine().calculate(
             p,
             _selectedSubject!.maxPracticalMarks,
@@ -263,6 +266,7 @@ class _MarksEntryScreenState extends State<MarksEntryScreen> {
       }
     }
 
+    if (!mounted) return;
     setState(() => _isLoading = false);
   }
 
@@ -288,9 +292,12 @@ class _MarksEntryScreenState extends State<MarksEntryScreen> {
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     initialValue: _selectedClass,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Class',
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
+                      helperText: _currentGrade != null
+                          ? 'Grade: $_currentGrade (Max: ${_getMaxGrade(_currentGrade!)})'
+                          : null,
                     ),
                     items: _classes
                         .map((c) => DropdownMenuItem(value: c, child: Text(c)))
@@ -428,7 +435,7 @@ class _MarksEntryScreenState extends State<MarksEntryScreen> {
                               // 2. TE Gr
                               DataCell(
                                 SizedBox(
-                                  width: 50,
+                                  width: 70,
                                   child: TextField(
                                     controller: ctrls.teGrade,
                                     readOnly: true,
@@ -437,6 +444,9 @@ class _MarksEntryScreenState extends State<MarksEntryScreen> {
                                       filled: true,
                                       fillColor: Colors.black12,
                                       border: InputBorder.none,
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 4,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -464,7 +474,7 @@ class _MarksEntryScreenState extends State<MarksEntryScreen> {
                               // 4. CE Gr
                               DataCell(
                                 SizedBox(
-                                  width: 50,
+                                  width: 70,
                                   child: TextField(
                                     controller: ctrls.ceGrade,
                                     readOnly: true,
@@ -473,6 +483,9 @@ class _MarksEntryScreenState extends State<MarksEntryScreen> {
                                       filled: true,
                                       fillColor: Colors.black12,
                                       border: InputBorder.none,
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 4,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -496,7 +509,7 @@ class _MarksEntryScreenState extends State<MarksEntryScreen> {
                               // 6. Final Grd
                               DataCell(
                                 SizedBox(
-                                  width: 50,
+                                  width: 70,
                                   child: TextField(
                                     controller: ctrls.finalGrade,
                                     readOnly: true,
@@ -505,6 +518,9 @@ class _MarksEntryScreenState extends State<MarksEntryScreen> {
                                       filled: true,
                                       fillColor: Colors.black12,
                                       border: InputBorder.none,
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 4,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -602,5 +618,12 @@ class _MarksEntryScreenState extends State<MarksEntryScreen> {
         message: 'Marks Saved Successfully',
       );
     }
+  }
+
+  String _getMaxGrade(String gradeKey) {
+    final rules = GradingEngine().getRulesFor(gradeKey);
+    if (rules.isEmpty) return '?';
+    // Assuming sorted desc, first is max
+    return rules.first['grade'] as String;
   }
 }

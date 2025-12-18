@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class DatabaseResetService {
   // CONSTANT VERSION - One-time reset trigger
-  static const String APP_VERSION = "2.0.0";
+  static const String APP_VERSION = "2.0.2";
   static const String _PREF_KEY_DB_VERSION = "db_version";
 
   /// Checks if the database needs to be reset based on the app version.

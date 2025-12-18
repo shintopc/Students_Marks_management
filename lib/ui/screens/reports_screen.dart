@@ -28,6 +28,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
   String? _selectedTerm;
   List<String> _terms = [];
 
+  // Filter
+  List<int> _selectedSubjectIds = []; // IDs of selected subjects
+
   // Data
   List<StudentModel> _students = [];
   List<SubjectModel> _subjects = [];
@@ -134,6 +137,106 @@ class _ReportsScreenState extends State<ReportsScreen> {
     setState(() => _isLoading = false);
   }
 
+  // Filter Logic
+  List<SubjectModel> get _filteredSubjects {
+    if (_selectedSubjectIds.isEmpty) return _subjects;
+    return _subjects.where((s) => _selectedSubjectIds.contains(s.id)).toList();
+  }
+
+  void _showSubjectFilterDialog() async {
+    // If empty (first load), select all
+    if (_selectedSubjectIds.isEmpty && _subjects.isNotEmpty) {
+      _selectedSubjectIds = _subjects.map((s) => s.id!).toList();
+    }
+
+    // Temporary list for dialog state
+    List<int> tempSelected = List.from(_selectedSubjectIds);
+
+    await showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('Filter Subjects'),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            setDialogState(() {
+                              tempSelected = _subjects
+                                  .map((s) => s.id!)
+                                  .toList();
+                            });
+                          },
+                          child: const Text('Select All'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            setDialogState(() {
+                              tempSelected.clear();
+                            });
+                          },
+                          child: const Text('Clear'),
+                        ),
+                      ],
+                    ),
+                    const Divider(),
+                    Flexible(
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: _subjects.length,
+                        itemBuilder: (context, index) {
+                          final subject = _subjects[index];
+                          final isSelected = tempSelected.contains(subject.id);
+                          return CheckboxListTile(
+                            title: Text(subject.name),
+                            value: isSelected,
+                            onChanged: (val) {
+                              setDialogState(() {
+                                if (val == true) {
+                                  tempSelected.add(subject.id!);
+                                } else {
+                                  tempSelected.remove(subject.id!);
+                                }
+                              });
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    // Update main state
+                    setState(() {
+                      _selectedSubjectIds = tempSelected;
+                    });
+                    Navigator.pop(ctx);
+                  },
+                  child: const Text('Apply'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -149,7 +252,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
               children: [
                 Expanded(
                   child: DropdownButtonFormField<String>(
-                    value: _selectedClass,
+                    initialValue: _selectedClass,
                     decoration: const InputDecoration(
                       labelText: 'Class',
                       border: OutlineInputBorder(),
@@ -166,7 +269,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: DropdownButtonFormField<String>(
-                    value: _selectedTerm,
+                    initialValue: _selectedTerm,
                     decoration: const InputDecoration(
                       labelText: 'Term',
                       border: OutlineInputBorder(),
@@ -178,6 +281,22 @@ class _ReportsScreenState extends State<ReportsScreen> {
                       setState(() => _selectedTerm = val);
                       _loadData();
                     },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // Filter Button
+                // Filter Button
+                SizedBox(
+                  height: 50, // Match default height of DropdownButtonFormField
+                  child: ElevatedButton.icon(
+                    onPressed: _showSubjectFilterDialog,
+                    icon: const Icon(Icons.filter_list),
+                    label: const Text('Filter Subjects'),
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -240,7 +359,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                       icon: const Icon(Icons.picture_as_pdf),
                       tooltip: 'Save Report Card PDF',
                       onPressed: () async {
-                        final targetSubjects = _subjects;
+                        final targetSubjects = _filteredSubjects; // Use filter
 
                         final pdfBytes = await ReportGenerator()
                             .generateReportCardPdf(
@@ -290,7 +409,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
   void _showReportCardDialog(StudentModel student) {
     // 1. Filter Subjects
-    final targetSubjects = _subjects;
+    final targetSubjects = _filteredSubjects; // Use filter
 
     // 2. Group Marks by Term
     final Map<String, Map<int, MarkModel>> termMarks = {};

@@ -23,7 +23,7 @@ class _SettingsScreenState extends State<SettingsScreen>
   final _schoolNameController = TextEditingController();
   final _addressController = TextEditingController();
   final _academicYearController = TextEditingController();
-  final _monthlyTargetController = TextEditingController();
+
   String _logoPath = '';
 
   List<Map<String, dynamic>> _gradingRules = [];
@@ -36,7 +36,7 @@ class _SettingsScreenState extends State<SettingsScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 6, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
 
     // Auto-refresh grades when switching to Grading Rules tab
     _tabController.addListener(() {
@@ -46,7 +46,7 @@ class _SettingsScreenState extends State<SettingsScreen>
     });
 
     _loadSettings();
-    _loadMonthlyTarget();
+    _loadSettings();
   }
 
   Future<void> _refreshAvailableGrades() async {
@@ -127,12 +127,6 @@ class _SettingsScreenState extends State<SettingsScreen>
     });
   }
 
-  Future<void> _loadMonthlyTarget() async {
-    await context.read<ConfigProvider>().loadMonthlyTarget();
-    final target = context.read<ConfigProvider>().monthlyTarget;
-    _monthlyTargetController.text = target.toString();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -144,7 +138,6 @@ class _SettingsScreenState extends State<SettingsScreen>
           tabs: const [
             Tab(text: 'School Profile'),
             Tab(text: 'Academic'), // Combined Classes/Subjects/Terms
-            Tab(text: 'Analysis'),
             Tab(text: 'Grading Rules'),
             Tab(text: 'Maintenance'),
             Tab(text: 'Help'),
@@ -158,7 +151,6 @@ class _SettingsScreenState extends State<SettingsScreen>
               children: [
                 _buildSchoolProfileTab(),
                 const AcademicManagementScreen(),
-                _buildAnalysisTab(),
                 _buildGradingRulesTab(),
                 _buildMaintenanceTab(),
                 _buildHelpTab(),
@@ -380,71 +372,6 @@ class _SettingsScreenState extends State<SettingsScreen>
         ),
       ],
     );
-  }
-
-  Widget _buildAnalysisTab() {
-    return Padding(
-      padding: const EdgeInsets.all(32.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Performance Analysis Settings',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 24),
-          Card(
-            elevation: 4,
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Monthly Target',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: _monthlyTargetController,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Enter Target Value',
-                      border: OutlineInputBorder(),
-                      helperText:
-                          'Set a numeric target for monthly performance analysis',
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _saveMonthlyTarget,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.all(20),
-                      ),
-                      child: const Text('Save Analysis Settings'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _saveMonthlyTarget() async {
-    final target = double.tryParse(_monthlyTargetController.text) ?? 0.0;
-    await context.read<ConfigProvider>().setMonthlyTarget(target);
-    if (mounted) {
-      CustomAppDialog.showSuccess(
-        context,
-        title: 'Saved',
-        message: 'Monthly Target Saved Successfully',
-      );
-    }
   }
 
   Future<void> _performFactoryReset() async {
@@ -734,7 +661,7 @@ class _SettingsScreenState extends State<SettingsScreen>
 
   void _showRuleDialog({int? index}) {
     final isEditing = index != null;
-    final rule = isEditing ? _gradingRules[index!] : null;
+    final rule = isEditing ? _gradingRules[index] : null;
 
     final minController = TextEditingController(
       text: isEditing ? rule!['min'].toString() : '',
@@ -819,7 +746,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                 };
 
                 if (isEditing) {
-                  _gradingRules[index!] = newRule;
+                  _gradingRules[index] = newRule;
                 } else {
                   _gradingRules.add(newRule);
                 }
